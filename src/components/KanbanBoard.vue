@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="custom-background">
     <v-row>
       <v-col v-for="(column, columnIndex) in columns" :key="column.id" cols="4">
         <Column :column="column" :columnIndex="columnIndex" @remove-column="removeColumn" @add-task="addTask" @drag-start="onDragStart" @drop="onDrop" @edit-card="editCard" />
@@ -7,7 +7,7 @@
     </v-row>
     <v-row>
       <v-col cols="4">
-        <v-card>
+        <v-card class="custom-card"> 
           <v-card-title>Add New Column</v-card-title>
           <v-card-text>
             <v-text-field v-model="newColumnName" label="Column Name" outlined dense></v-text-field>
@@ -120,3 +120,17 @@ const addTask = (columnIndex: number, title: string) => {
   newTaskTitle.value[columnIndex] = '';
 };
 </script>
+
+<style scoped>
+.custom-background {
+  background-color: rgba(242, 184, 180, 1);
+  min-height: 100vh;
+  padding-top: 20px;
+}
+
+.custom-card {
+  background-color: rgb(251, 237, 193); 
+  border-radius: 16px;
+}
+
+</style>

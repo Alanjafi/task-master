@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="custom-card">
     <v-card-title>{{ column.title }}</v-card-title>
     <v-card-text>
       <v-list>
@@ -21,18 +21,18 @@
             <v-list-item-content>
               <v-text-field v-model="card.title" label="Title" outlined dense></v-text-field>
               <v-textarea v-model="card.description" label="Description" outlined dense></v-textarea>
-              <v-btn @click="saveEdit(card)">Save</v-btn>
-              <v-btn @click="editCard(card, false)">Cancel</v-btn>
+              <v-btn class="custom-button" @click="saveEdit(card)">Save</v-btn>
+              <v-btn class="custom-button" @click="editCard(card, false)">Cancel</v-btn>
             </v-list-item-content>
           </template>
           <v-divider v-if="cardIndex < column.cards.length - 1"></v-divider>
         </v-list-item>
       </v-list>
       <v-text-field v-model="newTaskTitle" label="New Task Title" outlined dense></v-text-field>
-      <v-btn @click="addTask">Add Task</v-btn>
+      <v-btn class="custom-button" @click="addTask">Add Task</v-btn>
     </v-card-text>
     <v-card-actions>
-      <v-btn color="error" @click="removeColumn">Remove Column</v-btn>
+      <v-btn class="custom-button" color="error" @click="removeColumn">Remove Column</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -74,3 +74,22 @@ const removeColumn = () => {
   emit('remove-column', props.columnIndex);
 };
 </script>
+
+<style scoped>
+.custom-card {
+  background-color: rgb(251, 237, 193);
+  border-radius: 16px;
+  padding: 16px; 
+}
+
+.custom-button {
+  background-color: rgba(56, 17, 16, 1);
+  color: white;
+  border-radius: 16px;
+  margin-right: 8px; 
+}
+
+.v-list-item-content {
+  cursor: pointer;
+}
+</style>
