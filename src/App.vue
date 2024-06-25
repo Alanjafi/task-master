@@ -7,10 +7,23 @@
 </template>
 
 <script setup lang="ts">
-import KanbanBoard from './components/KanbanBoard.vue';
+import { createVuetify } from 'vuetify'
+import 'vuetify/styles'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
+import KanbanBoard from './components/KanbanBoard.vue'
+
+const vuetify = createVuetify({
+  icons: {
+    defaultSet: 'mdi',
+    aliases,
+    sets: {
+      mdi,
+    },
+  },
+})
+
 </script>
 
 <style>
 @import 'vuetify/dist/vuetify.css';
 </style>
-r

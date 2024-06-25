@@ -1,64 +1,122 @@
 <template>
-    <!-- This component displays a Kanban board with columns and cards -->
-    <v-container>
-      <v-row>
-        <v-col cols="4" v-for="column in columns" :key="column.id">
-          <v-card>
-            <v-card-title>{{ column.title }}</v-card-title>
-            <v-card-text>
-              <v-list>
-                <v-list-item v-for="card in column.cards" :key="card.id">
-                  <v-list-item-content>
-                    <v-list-item-title>{{ card.title }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ card.description }}</v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-              <v-text-field v-model="newCardTitle" label="New Card Title" outlined dense></v-text-field>
-              <v-textarea v-model="newCardDescription" label="New Card Description" outlined dense></v-textarea>
-              <v-btn class="custom-button rounded-button" @click="addCard(column.id)">Add Card</v-btn>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref } from 'vue';
-  
-  interface Card {
-    id: number;
-    title: string;
-    description: string;
+  <v-container>
+    <v-row>
+      <v-col v-for="(column, columnIndex) in columns" :key="column.id" cols="4">
+        <Column :column="column" :columnIndex="columnIndex" @remove-column="removeColumn" @add-task="addTask" @drag-start="onDragStart" @drop="onDrop" @edit-card="editCard" />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="4">
+        <v-card>
+          <v-card-title>Add New Column</v-card-title>
+          <v-card-text>
+            <v-text-field v-model="newColumnName" label="Column Name" outlined dense></v-text-field>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" @click="addColumn">Add Column</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import Column from './Column.vue';
+
+interface Card {
+  id: number;
+  title: string;
+  description: string;
+  editing: boolean;
+}
+
+interface Column {
+  id: number;
+  title: string;
+  cards: Card[];
+}
+
+const columns = ref<Column[]>([
+  {
+    id: 1,
+    title: 'To Do',
+    cards: [
+      { id: 1, title: 'Task 1', description: 'Description 1', editing: false },
+      { id: 2, title: 'Task 2', description: 'Description 2', editing: false },
+    ],
+  },
+  {
+    id: 2,
+    title: 'Doing',
+    cards: [
+      { id: 3, title: 'Task 3', description: 'Description 3', editing: false },
+    ],
+  },
+  {
+    id: 3,
+    title: 'Done',
+    cards: [
+      { id: 4, title: 'Task 4', description: 'Description 4', editing: false },
+    ],
+  },
+]);
+
+const nextColumnId = ref(columns.value.length + 1);
+const newColumnName = ref('');
+const newTaskTitle = ref<string[]>(Array(columns.value.length).fill(''));
+
+const draggedCard = ref<Card | null>(null);
+const draggedFromColumn = ref<Column | null>(null);
+
+const onDragStart = (card: Card, column: Column) => {
+  draggedCard.value = card;
+  draggedFromColumn.value = column;
+};
+
+const onDrop = (targetColumn: Column) => {
+  if (draggedCard.value && draggedFromColumn.value) {
+    const cardIndex = draggedFromColumn.value.cards.indexOf(draggedCard.value);
+    draggedFromColumn.value.cards.splice(cardIndex, 1);
+    targetColumn.cards.push(draggedCard.value);
+    draggedCard.value = null;
+    draggedFromColumn.value = null;
   }
-  
-  interface Column {
-    id: number;
-    title: string;
-    cards: Card[];
+};
+
+const editCard = (card: Card, isEditing: boolean) => {
+  card.editing = isEditing;
+};
+
+const addColumn = () => {
+  if (newColumnName.value.trim() === '') {
+    return;
   }
-  
-  const columns = ref<Column[]>([
-    { id: 1, title: 'To Do', cards: [{ id: 1, title: 'Task 1', description: 'Description 1' }] },
-    { id: 2, title: 'Doing', cards: [] },
-    { id: 3, title: 'Done', cards: [] }
-  ]);
-  
-  const newCardTitle = ref('');
-  const newCardDescription = ref('');
-  
-  function addCard(columnId: number) {
-    const column = columns.value.find(col => col.id === columnId);
-    if (column) {
-      column.cards.push({
-        id: Date.now(),
-        title: newCardTitle.value.trim(),
-        description: newCardDescription.value.trim()
-      });
-      newCardTitle.value = '';
-      newCardDescription.value = '';
-    }
+  columns.value.push({
+    id: nextColumnId.value++,
+    title: newColumnName.value.trim(),
+    cards: [],
+  });
+  newColumnName.value = '';
+  newTaskTitle.value.push('');
+};
+
+const removeColumn = (index: number) => {
+  columns.value.splice(index, 1);
+  newTaskTitle.value.splice(index, 1);
+};
+
+const addTask = (columnIndex: number, title: string) => {
+  if (title.trim() === '') {
+    return;
   }
-  </script>
-  
+  columns.value[columnIndex].cards.push({
+    id: Date.now(),
+    title,
+    description: '',
+    editing: false,
+  });
+  newTaskTitle.value[columnIndex] = '';
+};
+</script>
